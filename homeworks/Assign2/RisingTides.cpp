@@ -3,14 +3,38 @@
 #include "queue.h"
 using namespace std;
 
+void judge_flooded(Queue<GridLocation> &q, double height,const Grid<double>& terrain,GridLocation p,Grid<bool> &result) {
+    //remember that this site should not be fooled before
+    if( terrain.inBounds(p) &&(result[p] == false) && terrain[p] <= height) {
+        result[p] = true;
+        q.enqueue(p);
+    }
+}
+
 Grid<bool> floodedRegionsIn(const Grid<double>& terrain,
                             const Vector<GridLocation>& sources,
                             double height) {
-    /* TODO: Delete this line and the next four lines, then implement this function. */
-    (void) terrain;
-    (void) sources;
-    (void) height;
-    return {};
+    Grid<bool> result(terrain.numRows(),terrain.numCols(),false);
+    Queue<GridLocation> q;
+    for(GridLocation tmp : sources) {
+        q.enqueue(tmp);
+    }
+
+    while(!q.isEmpty()) {
+        GridLocation p = q.dequeue();
+        if(terrain[p] <= height) {
+            result[p] = true;
+        }
+        GridLocation pd = {p.row - 1,p.col};
+        GridLocation pu = {p.row + 1,p.col};
+        GridLocation pr = {p.row,p.col + 1};
+        GridLocation pl = {p.row,p.col - 1};
+        judge_flooded(q,height,terrain,pl,result);
+        judge_flooded(q,height,terrain,pr,result);
+        judge_flooded(q,height,terrain,pu,result);
+        judge_flooded(q,height,terrain,pd,result);
+    }
+    return result;
 }
 
 
