@@ -20,18 +20,30 @@ void drawTriangle(GWindow& window,
     window.fillPolygon({ x0, y0, x1, y1, x2, y2 });
 }
 
-/* TODO: Refer to Sierpinski.h for more information about what this function should do.
- * Then, delete this comment.
- */
 void drawSierpinskiTriangle(GWindow& window,
                             double x0, double y0,
                             double x1, double y1,
                             double x2, double y2,
                             int order) {
-    /* TODO: Delete this comment, these next lines of code, and implement this function. */
-    (void) window;
-    (void) x0; (void) y0;
-    (void) x1; (void) y1;
-    (void) x2; (void) y2;
-    (void) order;
+    if(order < 0) {
+        error("The order should be positive!");
+        return;
+    }
+    else if(order == 0) {
+        // basic case
+        drawTriangle(window,x0,y0,x1,y1,x2,y2);
+    }
+    else {
+        // Then recursive
+        double x_mid1 = (x0+x1)/2;
+        double y_mid1 = (y0+y1)/2;
+        double x_mid2 = (x0+x2)/2;
+        double y_mid2 = (y0+y2)/2;
+        double x_mid3 = (x1+x2)/2;
+        double y_mid3 = (y1+y2)/2;
+        order -= 1;
+        drawSierpinskiTriangle(window,x0,y0,x_mid1,y_mid1,x_mid2,y_mid2,order);
+        drawSierpinskiTriangle(window,x1,y1,x_mid1,y_mid1,x_mid3,y_mid3,order);
+        drawSierpinskiTriangle(window,x2,y2,x_mid3,y_mid3,x_mid2,y_mid2,order);
+    }
 }

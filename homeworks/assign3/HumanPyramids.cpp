@@ -1,15 +1,46 @@
 #include "HumanPyramids.h"
+#include "map.h"
+#include "error.h"
 using namespace std;
 
-/* TODO: Refer to HumanPyramids.h for more information about what this function should do.
- * Then, delete this comment.
- */
+#define WEIGHT 160
+#define HASH 100000  // The success depends on the hash value.This method is not a good one.
+
+int hash_f(int row,int col) {
+    return row*HASH + col;
+}
+
+double weightOnBackOf_helper(int row, int col, int pyramidHeight,Map<int,double>& table) {
+    // basic case
+    if(row == 0 && col == 0) {
+        return 0;
+    }
+    else if(col > row || col < 0 || row < 0) {
+        // deal with the narrow case
+        return -(WEIGHT);
+    }
+    else {
+        // just do recursive
+        int hash_v = hash_f(row,col);
+        if(table.containsKey(hash_v)) {
+            return table[hash_v];
+        }
+        else {
+            table[hash_v] = (weightOnBackOf_helper(row -1,col - 1,pyramidHeight,table) + WEIGHT) / 2 +
+                (weightOnBackOf_helper(row - 1,col, pyramidHeight,table) + WEIGHT) /2;
+            return table[hash_v];
+        }
+    }
+}
+
+
 double weightOnBackOf(int row, int col, int pyramidHeight) {
-    /* TODO: Delete the next few lines and implement this function. */
-    (void) row;
-    (void) col;
-    (void) pyramidHeight;
-    return 0;
+    if(row < 0 || col < 0 || col > row || row > pyramidHeight - 1) {
+        error("The row and col should all be positive!");
+    }
+    Map<int,double> table;
+    double ret =  weightOnBackOf_helper(row,col,pyramidHeight,table);
+    return ret;
 }
 
 
@@ -20,20 +51,19 @@ double weightOnBackOf(int row, int col, int pyramidHeight) {
 /* * * * * * Test Cases * * * * * */
 #include "GUI/SimpleTest.h"
 
-/* TODO: Add your own tests here. You know the drill - look for edge cases, think about
- * very small and very large cases, etc.
- */
+PROVIDED_TEST("Check the small case!") {
+    EXPECT_EQUAL(weightOnBackOf(1, 0, 10), 80);
+    EXPECT_EQUAL(weightOnBackOf(1, 1, 10), 80);
+    EXPECT_EQUAL(weightOnBackOf(0, 0, 10), 0);
+}
 
 
 
-
-
-
-
-
-
-
-
+PROVIDED_TEST("Check the big case!") {
+    EXPECT_EQUAL(weightOnBackOf(3, 1, 5), 340);
+    EXPECT_EQUAL(weightOnBackOf(3, 0, 5), 140);
+    EXPECT_EQUAL(weightOnBackOf(4, 2, 5), 500);
+}
 
 
 
@@ -55,7 +85,7 @@ PROVIDED_TEST("Stress test: Memoization is implemented (should take under a seco
      * line immediately after this one - the one that starts with SHOW_ERROR - once
      * you have implemented memoization to test whether it works correctly.
      */
-    SHOW_ERROR("This test is configured to always fail until you delete this line from\n         HumanPyramids.cpp. Once you have implemented memoization and want\n         to check whether it works correctly, remove the indicated line.");
+//    SHOW_ERROR("This test is configured to always fail until you delete this line from\n         HumanPyramids.cpp. Once you have implemented memoization and want\n         to check whether it works correctly, remove the indicated line.");
 
     /* Do not delete anything below this point. :-) */
 

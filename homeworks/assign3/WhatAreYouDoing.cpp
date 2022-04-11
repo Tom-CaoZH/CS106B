@@ -1,28 +1,93 @@
 #include "WhatAreYouDoing.h"
+#include <ctype.h>
+#include "strlib.h"
 using namespace std;
 
-/* TODO: Read the comments in WhatAreYouDoing.h to see what this function needs to do, then
- * delete this comment.
- *
- * Don't forget about the tokenize function defined in WhatAreYouDoing.h; you'll almost
- * certainly want to use it.
- */
+
+// backtrace
+void helper_f(Vector<string>& tokens,Set<string> &ret,string &str) {
+    if(tokens.isEmpty()) {
+        ret.add(str);
+    }
+    else {
+        string word = tokens[0];
+        string ori = str;
+        tokens.remove(0);
+        if(!isalpha(word[0])) {
+            str += word;
+            helper_f(tokens,ret,str);
+        }
+        else {
+            str += toUpperCase(word);
+            helper_f(tokens,ret,str);
+            ori += toLowerCase(word);
+            helper_f(tokens,ret,ori);
+        }
+        // backtrace
+        tokens.insert(0,word);
+    }
+}
+
 Set<string> allEmphasesOf(const string& sentence) {
-    /* TODO: Delete this line and the next one, then implement this function. */
-    (void) sentence;
-    return {};
+    Vector<string> tokens = tokenize(sentence);
+    Set<string> ret;
+    string str = "";
+    helper_f(tokens,ret,str);
+    return ret;
 }
 
 /* * * * * * Test Cases * * * * * */
 #include "GUI/SimpleTest.h"
 
-/* TODO: Add your own tests here. You know the drill - look for edge cases, think about
- * very small and very large cases, etc.
- */
+
+
+PROVIDED_TEST("case 1") {
+    Set<string> expected = {
+        "what are you doing?",
+        "what are you DOING?",
+        "what are YOU doing?",
+        "what are YOU DOING?",
+        "what ARE you doing?",
+        "what ARE you DOING?",
+        "what ARE YOU doing?",
+        "what ARE YOU DOING?",
+        "WHAT are you doing?",
+        "WHAT are you DOING?",
+        "WHAT are YOU doing?",
+        "WHAT are YOU DOING?",
+        "WHAT ARE you doing?",
+        "WHAT ARE you DOING?",
+        "WHAT ARE YOU doing?",
+        "WHAT ARE YOU DOING?",
+    };
+
+    EXPECT_EQUAL(allEmphasesOf("what are YOU doing?"), expected);
+}
 
 
 
+PROVIDED_TEST("case 2") {
+    Set<string> expected = {
+"quoth the raven, \"nevermore.\"",
+"quoth the raven, \"NEVERMORE.\"",
+"quoth the RAVEN, \"nevermore.\"",
+"quoth the RAVEN, \"NEVERMORE.\"",
+"quoth THE raven, \"nevermore.\"",
+"quoth THE raven, \"NEVERMORE.\"",
+"quoth THE RAVEN, \"nevermore.\"",
+"quoth THE RAVEN, \"NEVERMORE.\"",
+"QUOTH the raven, \"nevermore.\"",
+"QUOTH the raven, \"NEVERMORE.\"",
+"QUOTH the RAVEN, \"nevermore.\"",
+"QUOTH the RAVEN, \"NEVERMORE.\"",
+"QUOTH THE raven, \"nevermore.\"",
+"QUOTH THE raven, \"NEVERMORE.\"",
+"QUOTH THE RAVEN, \"nevermore.\"",
+"QUOTH THE RAVEN, \"NEVERMORE.\"",
+    };
 
+    EXPECT_EQUAL(allEmphasesOf("Quoth the raven, \"Nevermore.\""), expected);
+}
 
 
 
