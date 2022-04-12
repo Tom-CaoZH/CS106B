@@ -15,6 +15,7 @@
 #include "error.h"
 #include "stack.h"
 #include "set.h"
+#include<vector>
 using namespace std;
 
 /*
@@ -27,10 +28,51 @@ using namespace std;
  */
 
 int fewestCoinsFor(int cents, Set<int>& coins) {
-    // TODO: Your code here
-    return 0;
+    if(cents == 0)
+    {
+        return 0;
+    }
+    else
+    {
+        int bestsofar = INT32_MAX; //a value that will never be get,just make sure that it is more big
+        for(int elem : coins)
+        {
+            if(elem <= cents)
+            {
+                bestsofar = min(bestsofar,fewestCoinsFor(cents-elem,coins));
+            }
+        }
+        return bestsofar+1;
+    }
 }
-
+///**
+// * Given a collection of denominations and an amount to give in change, returns
+// * the minimum number of coins required to make change for it.
+// *
+// * @param cents How many cents we need to give back.
+// * @param coins The set of coins we can use.
+// * @return The minimum number of coins needed to make change.
+// */
+//int fewestCoinsFor(int cents, Set<int>& coins) {
+//    /* Base case: You need no coins to give change for no cents. */
+//    if (cents == 0) {
+//        return 0;
+//    }
+//    /* Recursive case: try each possible coin that doesn’t exceed the total as
+//    * as our first coin.
+//    */
+//    else {
+//        int bestSoFar = cents + 1; // Can never need this many coins;
+//        for (int coin: coins) {
+//            /* If this coin doesn’t exceed the total, try using it. */
+//            if (coin <= cents) {
+//                bestSoFar = min(bestSoFar,
+//                    fewestCoinsFor(cents - coin, coins));
+//            }
+//        }
+//        return bestSoFar + 1; // For the coin we just used.
+//    }
+//}
 
 /* * * * * Provided Tests Below This Point * * * * */
 

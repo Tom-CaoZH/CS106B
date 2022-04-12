@@ -1,14 +1,53 @@
 #include "ShiftScheduling.h"
 using namespace std;
 
-/* TODO: Refer to ShiftScheduling.h for more information about what this function should do.
- * Then, delete this comment and replace it with one of your own.
- */
+// check whether the target is overlapped with the shifts
+bool check(Set<Shift> shifts,Shift shift) {
+    for(Shift tmp : shifts) {
+        if(overlapsWith(tmp,shift)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void helper_f(Set<Shift>& shifts, int maxHours,Set<Shift> &ret,Set<Shift> &tmp_shifts,int value,int &max) {
+    if(shifts.isEmpty()) {
+        if(value > max) {
+            max = value;
+            ret = tmp_shifts;
+        }
+    }
+    else {
+        Shift shift = shifts.first();
+        shifts.remove(shift);
+        int len = lengthOf(shift);
+        if(maxHours >= len && check(tmp_shifts,shift)) {
+            // choose
+            tmp_shifts.add(shift);
+            helper_f(shifts,maxHours - len,ret,tmp_shifts,value + valueOf(shift),max);
+            // unchoose
+            tmp_shifts.remove(shift);
+            helper_f(shifts,maxHours,ret,tmp_shifts,value,max);
+        }
+        else {
+            // unchoose
+            helper_f(shifts,maxHours,ret,tmp_shifts,value,max);
+        }
+        shifts.add(shift);
+    }
+}
+
 Set<Shift> highestValueScheduleFor(const Set<Shift>& shifts, int maxHours) {
-    /* TODO: Delete the next few lines and implement this function. */
-    (void) shifts;
-    (void) maxHours;
-    return {};
+    if(maxHours < 0) {
+        error("The max hours should be positive!");
+    }
+    Set<Shift> ret;
+    Set<Shift> temp;
+    Set<Shift> copy = shifts;
+    int max = 0;
+    helper_f(copy,maxHours,ret,temp,0,max);
+    return ret;
 }
 
 
@@ -16,21 +55,7 @@ Set<Shift> highestValueScheduleFor(const Set<Shift>& shifts, int maxHours) {
 /* * * * * * Test Cases * * * * * */
 #include "GUI/SimpleTest.h"
 
-/* TODO: Add your own tests here. You know the drill - look for edge cases, think about
- * very small and very large cases, etc.
- */
-
-
-
-
-
-
-
-
-
-
-
-
+// TODO
 
 
 /* * * * * * Test cases from the starter files below this point. * * * * * */

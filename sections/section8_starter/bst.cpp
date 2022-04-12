@@ -27,10 +27,53 @@ using namespace std;
  * have a node that has multiple pointers into it, no node will point at itself, 
  * etc.
  */
+int MAXnumber(TreeNode* root) {
+    if(root == nullptr)
+    {
+        return INT32_MAX;
+    }
+    else
+    {
+        while(root->right != nullptr)
+        {
+            root = root->right;
+        }
+        return root->data;
+    }
+}
 
+int MINnmber(TreeNode* root) {
+    if(root == nullptr)
+    {
+        return INT32_MIN;
+    }
+    else
+    {
+        while(root->left != nullptr)
+        {
+            root = root->left;
+        }
+        return root->data;
+    }
+}
 bool isBST(TreeNode* root) {
-    /* TODO: Your code goes here! */
-    return false;
+    if(root == nullptr)
+    {
+        return true;
+    }
+    else
+    {
+        int cur = root->data;
+        if(root->left != nullptr && MAXnumber(root->left) >= cur)
+        {
+            return false;
+        }
+        if(root->right != nullptr && MINnmber(root->right) <= cur)
+        {
+            return false;
+        }
+        return isBST(root->left) && isBST(root->right);
+    }
 }
 
 PROVIDED_TEST("Simple positive tests for isBST function") {

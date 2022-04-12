@@ -8,10 +8,28 @@ struct BackpackItem {
     int survivalValue;  // You can assume this value will always >= 0
     int weight;         // You can assume this value will always >= 0
 };
+int fillBackpackHelper(Vector<BackpackItem>& items, int targetWeight,int index){
+    if(targetWeight == 0)
+    {
+        return 0;
+    }
+    else {
+        int bestsofar = INT32_MIN;
+        for(int i = index;i < items.size();i++)
+        {
+            BackpackItem item = items[i];
+            if(item.weight <= targetWeight)
+            {
+                bestsofar = max(bestsofar,fillBackpackHelper(items,targetWeight - item.weight,i+1) + item.survivalValue);
+            }
+        }
+        return bestsofar;
+    }
+    return 0;
+}
 
 int fillBackpack(Vector<BackpackItem>& items, int targetWeight){
-    // TODO: Fill me in!
-    return 0;
+    return fillBackpackHelper(items,targetWeight,0);
 }
 
 PROVIDED_TEST("Simple knapsack examples.") {

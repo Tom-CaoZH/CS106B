@@ -27,10 +27,35 @@ using namespace std;
  * to be balanced. You solution may call on other functions
  * solved in this section handout.
  */
+int isBalancedHelper(TreeNode *node) {
+    if(node == nullptr)
+    {
+        return 0;
+    }
+    else
+    {
+        return max(isBalancedHelper(node->left),isBalancedHelper(node->right)) + 1;
+    }
+}
 
 bool isBalanced(TreeNode *node) {
-    /* TODO: Your code goes here! */
-    return false;
+    if(node != nullptr)
+    {
+        int delta = isBalancedHelper(node->left) - isBalancedHelper(node->right);
+        if(delta >= -1 && delta <= 1)
+        {
+            return isBalanced(node->left) && isBalanced(node->right);
+        }
+        else
+        {
+            return false;
+        }
+
+     }
+    else
+    {
+        return true;
+    }
 }
 
 PROVIDED_TEST("Simple set of test cases for balanced function") {

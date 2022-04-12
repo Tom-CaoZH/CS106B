@@ -2,6 +2,7 @@
 
 #include "treenode.h"
 #include "vector.h"
+#include<limits.h>
 
 #define EMPTY INT_MAX
 

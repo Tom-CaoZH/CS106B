@@ -28,16 +28,42 @@ using namespace std;
  * pointer to the node containing the second-largest value
  * in the BST.
  */
-
+bool is_leaf_f(TreeNode* node)
+{
+    if(node->left == nullptr && node->right == nullptr)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
 TreeNode* biggestNodeIn(TreeNode* root) {
-    /* TODO: Your code goes here! */
-    return nullptr;
+    if(root->right == nullptr)
+    {
+        return root;
+    }
+    else
+    {
+        return biggestNodeIn(root->right);
+    }
 }
 
 TreeNode* secondBiggestNodeIn(TreeNode* root) {
-    /* TODO: Your code goes here! */
-    return nullptr;
+    if(root->right == nullptr && root->left != nullptr)
+    {
+        return root->left;
+    }
+    else if(is_leaf_f(root->right))
+    {
+        return root;
+    }
+    else
+    {
+        return secondBiggestNodeIn(root->right);
+    }
 }
 
 PROVIDED_TEST("Simple tests for biggestNodeIn function") {

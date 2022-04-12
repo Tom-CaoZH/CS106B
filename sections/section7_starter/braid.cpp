@@ -26,9 +26,37 @@ using namespace std;
  * the reverse of that list into the original. (In this case,
  * you will need to create new nodes.)
  */
+void braidHelper(Stack<int> &contains,Node* &flag) {
+    if(flag != nullptr)
+    {
+        if(flag->next == nullptr)
+        {
+            Node* newnode= new Node();
+            newnode->data = contains.pop();
+            flag->next = newnode;
+        }
+        else
+        {
+            Node* newnode= new Node();
+            newnode->data = contains.pop();
+            newnode->next = flag->next;
+            flag->next = newnode;
+            braidHelper(contains,flag->next->next);
+        }
+    }
+}
 
 void braid(Node*& front) {
-    (void) front;
+    Stack<int> contains;
+    Node* temp = front;
+    //get a stack
+    while(temp != nullptr)
+    {
+        contains.push(temp->data);
+        temp = temp->next;
+    }
+    Node* flag = front;
+    braidHelper(contains,flag);
 }
 
 /* * * * * Provided Tests Below This Point * * * * */

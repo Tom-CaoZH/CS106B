@@ -21,9 +21,48 @@ using namespace std;
  * and return the longest common substring.
  */
 
-string longestCommonSubsequence(string s1, string s2){
-    // TODO: Your code here
-    return "";
+//string longestCommonSubsequence(string s1, string s2){
+//    if(s1 == "" || s2 == "")
+//    {
+//        return "";
+//    }
+//    else
+//    {
+//        char c1 = s1[0];
+//        char c2 = s2[0];
+//        if(c1 == c2)
+//        {
+//            return c1 + longestCommonSubsequence(s1.substr(1),s2.substr(1));
+//        }
+//        else
+//        {
+//            string first = longestCommonSubsequence(s1.substr(1),s2);
+//            string second = longestCommonSubsequence(s1,s2.substr(1));
+//            if(first.length() > second.length())
+//            {
+//                return first;
+//            }
+//            else {
+//                return second;
+//            }
+//        }
+//    }
+//}
+string longestCommonSubsequence(string s1, string s2) {
+    if (s1.length() == 0 || s2.length() == 0) {
+        return "";
+    } else if (s1[0] == s2[0]) {
+        return s1[0] + longestCommonSubsequence(s1.substr(1),
+                            s2.substr(1));
+    } else {
+        string choice1 = longestCommonSubsequence(s1, s2.substr(1));
+        string choice2 = longestCommonSubsequence(s1.substr(1), s2);
+        if (choice1.length() >= choice2.length()) {
+            return choice1;
+        } else {
+            return choice2;
+        }
+    }
 }
 
 
@@ -45,3 +84,6 @@ PROVIDED_TEST("Provided Test: Sea Shells") {
     EXPECT_EQUAL(longestCommonSubsequence("she sells", "seashells"), "sesells");
 }
 
+PROVIDED_TEST("Provided Test: Sea Shells") {
+    EXPECT_EQUAL(longestCommonSubsequence("hieroglyphology", "michaelangelo"), "hello");
+}

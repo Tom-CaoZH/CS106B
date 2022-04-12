@@ -16,6 +16,7 @@
 #include "utility.h"
 #include "error.h"
 #include "set.h"
+#include<limits.h>
 using namespace std;
 
 /*
@@ -30,8 +31,14 @@ using namespace std;
  */
 
 int height(TreeNode *node) {
-    /* TODO: Your code goes here! */
-    return 0;
+    if(node == nullptr)
+    {
+        return 0;
+    }
+    else
+    {
+        return max(height(node->left),height(node->right)) + 1;
+    }
 }
 
 PROVIDED_TEST("Simple set of test cases for height function") {

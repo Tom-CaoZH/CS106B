@@ -1,4 +1,4 @@
-/*
+﻿/*
  * CS106B Section Handout Test Harness: Section 2
  * ----------------------------------------------
  * These problems have been galvanized from years of
@@ -29,10 +29,37 @@ bool login(string password) {
 }
 
 
+void crackingPasswordsHelper(int n,string &path,string &result){
+    if(path.size() >= n)
+    {
+        if(login(path))
+        {
+            result = path;
+        }
+        else
+        {
+            return;
+        }
+    }
+    else
+    {
+       for(char ch = 'a';ch <= 'z';ch++)
+       {
+           string old = path;
+           string cur;
+           cur = path + ch;
+           crackingPasswordsHelper(n ,path,result);
+           crackingPasswordsHelper(n ,cur,result);
+           path = old;
+       }
+    }
+}
 
 string crackingPasswords(int n){
-    // TODO: Your code here
-    return "";
+    string path = "";
+    string result = "";
+    crackingPasswordsHelper(n,path,result);
+    return result;
 }
 
 

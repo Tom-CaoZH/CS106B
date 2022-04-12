@@ -30,10 +30,33 @@ using namespace std;
  * (leaf or not). You must free the memory for any removed
  * nodes.
  */
+bool is_leaf(TreeNode* node)
+{
+    if(node->left == nullptr && node->right == nullptr)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
 void removeLeaves(TreeNode*& node) {
-    /* TODO: Your code goes here! */
-    (void) node;
+    if(node != nullptr)
+    {
+        if(is_leaf(node))
+        {
+            TreeNode* trash = node;
+            node = nullptr;
+            delete trash;
+        }
+        else
+        {
+            removeLeaves(node->left);
+            removeLeaves(node->right);
+        }
+    }
 }
 
 PROVIDED_TEST("Simple set of test cases for countLeft function") {

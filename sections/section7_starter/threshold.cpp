@@ -19,33 +19,56 @@
 #include "set.h"
 using namespace std;
 
+//bool valueWithinThreshold (double value, double target, double threshold) {
+//    return value >= target - threshold && value <= target + threshold;
+//}
+
+//void removeAllThreshold(DoubleNode*& front, double value, double threshold) {
+//    while (front != nullptr
+//        && valueWithinThreshold(front->data, value, threshold)) {
+//        DoubleNode* trash = front;
+//        front = front->next;
+//        delete trash;
+//    }
+
+//    if (front != nullptr) {
+//        DoubleNode* current = front;
+//        while (current->next != nullptr) {
+//            if (valueWithinThreshold(current->next->data, value, threshold)) {
+//                DoubleNode* trash = current->next;
+//                current->next = current->next->next;
+//                delete trash;
+//            } else {
+//                current = current->next;
+//            }
+//        }
+//    }
+//}
 void removeAllThreshold(DoubleNode*& front, double value, double threshold) {
-    DoubleNode* temp = front;
-    double low = value - threshold;
-    double high = value + threshold;
-    while(temp != nullptr && temp->next != nullptr)
-    {
-        int cur = temp->next->data;
-        if(cur >= low && cur <= high)
-        {
-            DoubleNode* trash = temp->next;
-            if(temp->next->next == nullptr)
-            {
-                temp->next = nullptr;
-            }
-            else
-            {
-                temp->next = temp->next->next;
-            }
-            delete trash;
-        }
-        temp = temp->next;
-    }
-    if(front != nullptr && front->data >= low && front->data <= high)
+    while(front != nullptr
+          && front->data >= value - threshold && front->data <= value + threshold)
     {
         DoubleNode* trash2 = front;
         front = front->next;
         delete trash2;
+    }
+    if(front != nullptr)
+    {
+        DoubleNode* temp = front;
+        while(temp->next != nullptr)
+        {
+            double cur = temp->next->data;
+            if(cur >=  value - threshold && cur <=  value + threshold)
+            {
+                DoubleNode* trash = temp->next;
+                temp->next = temp->next->next;
+                delete trash;
+            }
+            else
+            {
+                temp = temp->next; //this is your error position
+            }
+        }
     }
 }
 
