@@ -1,27 +1,26 @@
 Put your answers to the debugging questions from Problem One in this file.
 
 Q1:
-
-
+numDisks : 5
+start : 'A'
+temp : 'B'
+finish : 'C'
 
 Q2:
-
-
+function : makeTheMagicHappen  in file :  TowersOfHanoiGUI.cpp 
 
 Q3:
-
-
+31
 
 Q4:
-
-
+15
 
 Q5:
-
-
+hi
 
 Q6:
-
-
+the string : chosen
+And the sentence : chosen += ch
 
 Q7:
+when we add ch to the chosen string in a loop, but in the next loop , it is still in the chosen string but we need to remove it and add a new ch to it 

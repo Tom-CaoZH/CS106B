@@ -1,11 +1,49 @@
-#include "Matchmaker.h"
+﻿#include "Matchmaker.h"
 using namespace std;
 
-bool hasPerfectMatching(const Map<string, Set<string>>& possibleLinks, Set<Pair>& matching) {
-    /* TODO: Delete this comment and these remaining lines, then implement this function. */
-    (void) possibleLinks;
-    (void) matching;
+
+// In this case : all the people in principle are needed to be paired . So we can randomly choose one and start
+// But in the max case : we need to go through all the cases
+bool hasPerfectMatchingHelper(Map<string, Set<string>>& possibleLinks, Set<Pair>& matching) {
+    if(possibleLinks.size() % 2 != 0) {
+        // some one can not be matched
+        return false;
+    }
+    if(possibleLinks.isEmpty()) {
+        // all matched
+        return true;
+    }
+    Set<string> links;
+    string people = possibleLinks.firstKey();
+    links = possibleLinks[people];
+    possibleLinks.remove(people);
+    for(string tmp : links) {
+        if(!possibleLinks.containsKey(tmp)) {
+            // this one have already be matched, Then choose next one
+            // In this case, a more generral method is to use a visited container to contain this
+            continue;
+        }
+        Set<string> tmp_links = possibleLinks[tmp];
+        possibleLinks.remove(tmp);
+        Pair match(people,tmp);
+        matching.add(match);
+        bool judge =  hasPerfectMatching(possibleLinks,matching);
+        if(judge) {
+            // we get it
+            return judge;
+        }
+        // we have not find it then restore and recursive
+        possibleLinks.put(tmp,tmp_links);
+        matching.remove(match);
+    }
+    // there is someone that have not be matched
     return false;
+}
+
+
+bool hasPerfectMatching(const Map<string, Set<string>>& possibleLinks, Set<Pair>& matching) {
+    Map<string, Set<string>> copy_links = possibleLinks;
+    return hasPerfectMatchingHelper(copy_links,matching);
 }
 
 Set<Pair> maximumWeightMatching(const Map<string, Map<string, int>>& possibleLinks) {
@@ -78,6 +116,19 @@ namespace {
 }
 
 #include "GUI/SimpleTest.h"
+
+PROVIDED_TEST("STUDENT_TEST") {
+    /* The world is just a single person A, with no others. How sad. :-(
+     *
+     *                 A
+     *
+     * There is no perfect matching.
+     */
+
+    Set<Pair> unused;
+    EXPECT(!hasPerfectMatching({ { "A", {} } }, unused));
+}
+
 
 PROVIDED_TEST("hasPerfectMatching works on a world with just one person.") {
     /* The world is just a single person A, with no others. How sad. :-(
