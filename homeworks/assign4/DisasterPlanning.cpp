@@ -1,17 +1,60 @@
 #include "DisasterPlanning.h"
 using namespace std;
 
-/* TODO: Refer to DisasterPlanning.h for more information about this function.
- * Then, delete this comment.
- */
+bool canBeMadeDisasterReadyHelper(const Map<string, Set<string>>& roadNetwork,
+                            int numCities,
+                            Set<string>& all_can_get,
+                            Set<string>& supplyLocations) {
+    /* TODO: Delete the next few lines and implement this function. */
+    for(string each_road : roadNetwork) {
+        if(!all_can_get.contains(each_road)) {
+            if(numCities == 0) {
+                // There is no way to go, flase,to return
+                return false;
+            }
+            // choose the road ifself
+            Set<string> can_be_get = roadNetwork[each_road];
+            supplyLocations.add(each_road);
+            can_be_get.add(each_road);
+            Set<string> copy_all_can_get = all_can_get;
+            all_can_get += can_be_get;
+            bool judge = canBeMadeDisasterReadyHelper(roadNetwork,numCities - 1,all_can_get,supplyLocations);
+            if(judge) {
+                // if true , we get it
+                return true;
+            }
+
+            // if false , then we put the supply in its labour
+            // restore
+            all_can_get = copy_all_can_get;
+            supplyLocations.remove(each_road);
+
+            Set<string> labours = roadNetwork[each_road];
+            for(string labour : labours) {
+                can_be_get = roadNetwork[labour];
+                supplyLocations.add(labour);
+                can_be_get.add(labour);
+                all_can_get += can_be_get;
+                if(canBeMadeDisasterReadyHelper(roadNetwork,numCities - 1,all_can_get,supplyLocations)) {
+                    return true;
+                }
+                all_can_get = copy_all_can_get;
+                supplyLocations.remove(labour);
+            }
+            return false;
+        }
+    }
+    return true;
+}
+
 bool canBeMadeDisasterReady(const Map<string, Set<string>>& roadNetwork,
                             int numCities,
                             Set<string>& supplyLocations) {
-    /* TODO: Delete the next few lines and implement this function. */
-    (void) roadNetwork;
-    (void) numCities;
-    (void) supplyLocations;
-    return false;
+    if(numCities < 0) {
+        error("The numCities should be positive.");
+    }
+    Set<string> all_can_get;
+    return canBeMadeDisasterReadyHelper(roadNetwork,numCities,all_can_get,supplyLocations);
 }
 
 
@@ -55,18 +98,6 @@ bool isCovered(const string& city,
 /* * * * * * Test Cases Below This Point * * * * * */
 
 /* TODO: Add your own custom tests here! */
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /* * * * * Provided Tests Below This Point * * * * */
