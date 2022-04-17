@@ -1,37 +1,105 @@
 #include "HeapPQueue.h"
 using namespace std;
 
+/* when test please remove the printtest function ,
+ * otherwise it will unable to pass the test(the I/O needs too mush time)
+*/
+
 HeapPQueue::HeapPQueue() {
-    /* TODO: Implement this. */
+   this->elems = new DataPoint[INITIAL_SIZE];
+   allocatedSize = INITIAL_SIZE;
+   logicalSize = 0;
 }
 
 HeapPQueue::~HeapPQueue() {
-    /* TODO: Implement this. */
+    delete [] elems;
 }
 
 int HeapPQueue::size() const {
-    /* TODO: Delete the next line and implement this. */
-    return 0;
+    return logicalSize;
 }
 
 bool HeapPQueue::isEmpty() const {
-    /* TODO: Delete the next line and implement this. */
-    return 0;
+    return (logicalSize == 0);
 }
 
 void HeapPQueue::enqueue(const DataPoint& data) {
-    /* TODO: Delete the next line and implement this. */
-    (void) data;
+    logicalSize++;
+    if(logicalSize == allocatedSize) {
+        // resize
+        DataPoint* new_elems = new DataPoint[allocatedSize * 2];
+        for(int i = 1; i < logicalSize; ++i) {
+            new_elems[i]= elems[i];
+        }
+        DataPoint* trash = elems;
+        delete [] trash;
+        elems = new_elems;
+        allocatedSize *= 2;
+    }
+    elems[logicalSize] = data;
+    int pointer = logicalSize;
+    DataPoint tmp;
+    while(true) {
+        if(pointer == 1) {
+            break;
+        }
+        if(elems[pointer].weight < elems[pointer/2].weight) {
+            tmp = elems[pointer];
+            elems[pointer] = elems[pointer / 2];
+            elems[pointer / 2] = tmp;
+        }
+        else {
+            // nolonger need to swap
+            break;
+        }
+        pointer = pointer/2;
+    }
+//    printDebugInfo();
 }
 
 DataPoint HeapPQueue::peek() const {
-    /* TODO: Delete the next line and implement this. */
-    return {};
+    if(logicalSize == 0) {
+        error("no elem");
+    }
+    return elems[1];
 }
 
 DataPoint HeapPQueue::dequeue() {
-    /* TODO: Delete the next line and implement this. */
-    return {};
+    if(logicalSize == 0) {
+        error("no elem");
+    }
+    DataPoint first = elems[1];
+    elems[1] = elems[logicalSize];
+    logicalSize--;
+    int pointer = 1;
+    DataPoint tmp;
+    while(true) {
+        // If no son then break
+        if(pointer * 2 > logicalSize ) {
+            break;
+        }
+        DataPoint* left = &elems[pointer*2];
+        DataPoint* right = &elems[pointer*2 + 1];
+        DataPoint* min = left;
+        int next = pointer*2;
+        if((*right).weight < (*min).weight) {
+            min = right;
+            next++;
+        }
+        if(elems[pointer].weight > (*left).weight || elems[pointer].weight > (*right).weight) {
+            tmp = elems[pointer];
+            elems[pointer] = *min;
+            *min = tmp;
+        }
+        else {
+            // nolonger need to swap
+            break;
+        }
+        pointer = next;
+//        printDebugInfo();
+    }
+//    printDebugInfo();
+    return first;
 }
 
 /* This function is purely for you to use during testing. You can have it do whatever
@@ -45,26 +113,22 @@ DataPoint HeapPQueue::dequeue() {
  * actually does.
  */
 void HeapPQueue::printDebugInfo() {
-    /* TODO: Delete this comment and (optionally) put debugging code here. */
+    for(int i = 1;i <= logicalSize; ++i) {
+        cout << elems[i] << " ";
+    }
+    cout << endl;
 }
 
 
 /* * * * * * Test Cases Below This Point * * * * * */
 
-/* TODO: Add your own custom tests here! */
 
+PROVIDED_TEST("STUDENT_TEST") {
+    HeapPQueue pq;
 
-
-
-
-
-
-
-
-
-
-
-
+    EXPECT(pq.isEmpty());
+    EXPECT(pq.size() == 0);
+}
 
 /* * * * * Provided Tests Below This Point * * * * */
 

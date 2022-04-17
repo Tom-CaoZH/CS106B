@@ -1,9 +1,8 @@
 Q1:
-
-
-
+Linux
 
 Q2:
+all be 0 and ""
 
 
 

@@ -1,11 +1,32 @@
 #include "Apportionment.h"
+#include <cmath>
+#include "HeapPQueue.h"
+#include "queue.h"
 using namespace std;
 
 Map<string, int> apportion(const Map<string, int>& populations, int numSeats) {
-    /* TODO: Delete this line and the lines below it, then implement this function. */
-    (void) populations;
-    (void) numSeats;
-    return {};
+    Vector<string> all_states = populations.keys();
+    if(all_states.size() > numSeats) {
+        error("The numSize must larger than the number of state");
+    }
+    Map<string, int> votes;
+    HeapPQueue pq = HeapPQueue();
+    for(string state : all_states) {
+        votes.put(state,1);
+        DataPoint elem;
+        elem.name = state;
+        elem.weight = -(populations[state] / sqrt(2));
+        pq.enqueue(elem);
+        numSeats--;
+    }
+    while(numSeats) {
+        DataPoint tmp = pq.dequeue();
+        votes[tmp.name]++;
+        numSeats--;
+        tmp.weight = -populations[tmp.name] / sqrt(votes[tmp.name]*(votes[tmp.name] + 1));
+        pq.enqueue(tmp);
+    }
+    return votes;
 }
 
 
