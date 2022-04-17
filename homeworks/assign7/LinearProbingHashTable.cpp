@@ -2,64 +2,130 @@
 using namespace std;
 
 LinearProbingHashTable::LinearProbingHashTable(HashFunction<string> hashFn) {
-    /* TODO: Delete this comment and the next line, then implement this function. */
-    (void) hashFn;
+    this->allocateSize = hashFn.numSlots();
+    this->elems = new Slot[this->allocateSize];
+    for(int i = 0;i < allocateSize; ++i) {
+        elems[i].type = SlotType::EMPTY;
+        // To handle the "" case
+        elems[i].value = "garbage";
+    }
+    this->hashFn = hashFn;
+    this->logicalSize = 0;
 }
 
 LinearProbingHashTable::~LinearProbingHashTable() {
-    /* TODO: Delete this comment, then implement this function. */
+    delete [] elems;
 }
 
 int LinearProbingHashTable::size() const {
-    /* TODO: Delete this comment and the next lines, then implement this function. */
-    return -1;
+    return logicalSize;
 }
 
 bool LinearProbingHashTable::isEmpty() const {
-    /* TODO: Delete this comment and the next lines, then implement this function. */
-    return false;
+    return (logicalSize == 0);
 }
 
 bool LinearProbingHashTable::insert(const string& elem) {
-    /* TODO: Delete this comment and the next lines, then implement this function. */
-    (void) elem;
+    if(this->contains(elem)) {
+        return false;
+    }
+    int index = this->hashFn(elem);
+    if(elems[index].type != SlotType::FILLED) {
+        elems[index].value = elem;
+        elems[index].type = SlotType::FILLED;
+        this->logicalSize++;
+        return true;
+    }
+    int new_index = index + 1;
+    new_index %= this->allocateSize;
+    while(new_index != index) {
+        if(elems[new_index].type != SlotType::FILLED) {
+            elems[new_index].value = elem;
+            elems[new_index].type = SlotType::FILLED;
+            this->logicalSize++;
+            return true;
+        }
+        new_index++;
+        new_index %= this->allocateSize;
+    }
     return false;
 }
 
 bool LinearProbingHashTable::contains(const string& elem) const {
-    /* TODO: Delete this comment and the next lines, then implement this function. */
-    (void) elem;
+    int index = this->hashFn(elem);
+    if(elems[index].value == elem && elems[index].type == SlotType::FILLED) {
+        return true;
+    }
+    int new_index = index + 1;
+    new_index %= this->allocateSize;
+    while(new_index != index) {
+        if(elems[new_index].type == SlotType::EMPTY) {
+            // This is the optimization
+            break;
+        }
+        if(elems[new_index].value == elem && elems[new_index].type == SlotType::FILLED) {
+            return true;
+        }
+        new_index++;
+        new_index %= this->allocateSize;
+    }
     return false;
 }
 
 bool LinearProbingHashTable::remove(const string& elem) {
-    /* TODO: Delete this comment and the next lines, then implement this function. */
-    (void) elem;
+    int index = this->hashFn(elem);
+    if(elems[index].value == elem) {
+        if(elems[index].type == SlotType::TOMBSTONE) {
+            return false;
+        }
+        elems[index].type = SlotType::TOMBSTONE;
+        this->logicalSize--;
+        return true;
+    }
+    int new_index = index + 1;
+    new_index %= this->allocateSize;
+    while(new_index != index) {
+        if(elems[new_index].type == SlotType::EMPTY) {
+            break;
+        }
+        if(elems[new_index].value == elem) {
+            if(elems[new_index].type == SlotType::TOMBSTONE) {
+                return false;
+            }
+            elems[new_index].type = SlotType::TOMBSTONE;
+            this->logicalSize--;
+            return true;
+        }
+        new_index++;
+        new_index %= this->allocateSize;
+    }
     return false;
 }
 
 void LinearProbingHashTable::printDebugInfo() const {
-    /* TODO: Remove this comment and implement this function. */
+    for(int i = 0;i <= logicalSize; ++i) {
+        cout << elems[i] << " " ;
+    }
+    cout << endl;
 }
 
 
 /* * * * * * Test Cases Below This Point * * * * * */
 #include "GUI/SimpleTest.h"
 
-/* Optional: Add your own custom tests here! */
+PROVIDED_TEST("STUDENT_TEST") {
+    LinearProbingHashTable table(Hash::random(10));
 
+    /* Check the external interface to make sure it looks good. */
+    EXPECT_EQUAL(table.size(), 0);
+    EXPECT(table.isEmpty());
 
-
-
-
-
-
-
-
-
-
-
-
+    /* Check that, internally, all is well. */
+    EXPECT_NOT_EQUAL(table.elems, nullptr);
+    for (int i = 0; i < 10; i++) {
+        EXPECT_EQUAL(table.elems[i].type, LinearProbingHashTable::SlotType::EMPTY);
+    }
+}
 
 /* * * * * Provided Tests Below This Point * * * * */
 #include "vector.h"
@@ -781,7 +847,7 @@ PROVIDED_TEST("Stress Test: Inserts/searches/deletes work in expected time O(1) 
 #include "filelib.h"
 #include "Demos/Timer.h"
 PROVIDED_TEST("Stress test: Core functions do not cause stack overflows (should take at most 15 seconds)") {
-    SHOW_ERROR("Stress test is disabled by default. To run it, comment out line " + to_string(__LINE__) + " of " + getTail(__FILE__) + ".");
+//    SHOW_ERROR("Stress test is disabled by default. To run it, comment out line " + to_string(__LINE__) + " of " + getTail(__FILE__) + ".");
     const int kTableSize = 1000000;
 
     /* Create a table with 1,000,000 slots, then fill in the first 999,999 of them. */
@@ -818,7 +884,7 @@ PROVIDED_TEST("Stress test: Core functions do not cause stack overflows (should 
 
 #include <fstream>
 PROVIDED_TEST("Stress Test: Handles large workflows with little free space (should take at most fifteen seconds)") {
-    SHOW_ERROR("Stress test is disabled by default. To run it, comment out line " + to_string(__LINE__) + " of " + getTail(__FILE__) + ".");
+//    SHOW_ERROR("Stress test is disabled by default. To run it, comment out line " + to_string(__LINE__) + " of " + getTail(__FILE__) + ".");
 
     Vector<string> english;
     ifstream input("res/EnglishWords.txt");

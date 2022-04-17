@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "HashFunction.h"
 #include "Demos/Utility.h"
@@ -89,17 +89,12 @@ private:
      */
     Slot* elems = nullptr;
 
-    /* TODO: Add any private member variables, member functions, or member
-     * types that you'd like. You're welcome to implement this type however
-     * you'd like, provided that you do all your own memory management, you
-     * don't use any container types (e.g. Vector, HashSet, etc.), and that
-     * you use linear probing with tombstones.
-     *
-     * TODO: Delete this comment before submitting.
-     */
-
-
-
+    // the numSize
+    int allocateSize = 0;
+    // the actual size
+    int logicalSize = 0;
+    // the hash function
+    HashFunction<std::string> hashFn;
 
     /* Internal shenanigans to make this play well with C++. */
     DISALLOW_COPYING_OF(LinearProbingHashTable);

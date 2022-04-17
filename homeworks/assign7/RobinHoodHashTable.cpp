@@ -1,45 +1,132 @@
 #include "RobinHoodHashTable.h"
+#include <algorithm>
 using namespace std;
 
 RobinHoodHashTable::RobinHoodHashTable(HashFunction<string> hashFn) {
-    /* TODO: Delete this comment, then implement this function. */
-    (void) hashFn;
+    this->allocateSize = hashFn.numSlots();
+    this->elems = new Slot[this->allocateSize];
+    this->logicalSize = 0;
+    for(int i = 0;i < allocateSize; ++i) {
+        elems[i].distance = this->EMPTY_SLOT;
+        elems[i].value = "garbage";
+    }
+    this->hashFn = hashFn;
 }
 
 RobinHoodHashTable::~RobinHoodHashTable() {
-    /* TODO: Delete this comment, then implement this function. */
+    delete [] elems;
 }
 
 int RobinHoodHashTable::size() const {
-    /* TODO: Delete this comment and the next line, then implement this function. */
-    return -1;
+    return logicalSize;
 }
 
 bool RobinHoodHashTable::isEmpty() const {
-    /* TODO: Delete this comment and the next line, then implement this function. */
-    return false;
+    return (logicalSize == 0);
 }
 
 bool RobinHoodHashTable::insert(const string& elem) {
-    /* TODO: Delete this comment and the next lines, then implement this function. */
-    (void) elem;
+    int index= this->hashFn(elem);
+    int distance = 0;
+    if(this->contains(elem)) {
+        return false;
+    }
+    if(elems[index].distance == this->EMPTY_SLOT) {
+        // this position is empty
+        elems[index].value = elem;
+        elems[index].distance = distance;
+        this->logicalSize++;
+        return true;
+    }
+    distance++;
+    int new_index = index + 1;
+    new_index %= this->allocateSize;
+    string name  = elem;
+    while(new_index != index) {
+        if(elems[new_index].distance == this->EMPTY_SLOT) {
+            // this position is empty
+            elems[new_index].value = name;
+            elems[new_index].distance = distance;
+            this->logicalSize++;
+            return true;
+        }
+        else if(elems[new_index].distance < distance) {
+            // then replace
+            swap(elems[new_index].distance,distance);
+            string tmp = name;
+            name = elems[new_index].value;
+            elems[new_index].value = tmp;
+        }
+        new_index++;
+        new_index %= this->allocateSize;
+        distance++;
+    }
     return false;
 }
 
 bool RobinHoodHashTable::contains(const string& elem) const {
-    /* TODO: Delete this comment and the next lines, then implement this function. */
-    (void) elem;
+    int index = this->hashFn(elem);
+    int distance = 0;
+    if(elems[index].value == elem) {
+        return true;
+    }
+    distance++;
+    int new_index = index + 1;
+    new_index %= this->allocateSize;
+    while(new_index != index) {
+        if(elems[new_index].distance == this->EMPTY_SLOT || elems[new_index].distance < distance) {
+            // This is the optimization
+            break;
+        }
+        if(elems[new_index].value == elem) {
+            return true;
+        }
+        distance++;
+        new_index++;
+        new_index %= this->allocateSize;
+    }
     return false;
 }
 
+void RobinHoodHashTable::rearrange(int begin) {
+    int index = begin;
+    while(true) {
+        if(elems[index].distance != this->EMPTY_SLOT) {
+            int s_index = hashFn(elems[index].value);
+        }
+    }
+}
+
 bool RobinHoodHashTable::remove(const string& elem) {
-    /* TODO: Delete this comment and the next lines, then implement this function. */
-    (void) elem;
+    if(!(this->contains(elem))) {
+        return false;
+    }
+    int index = this->hashFn(elem);
+    if(elems[index].value == elem) {
+        elems[index].distance = this->EMPTY_SLOT;
+        this->logicalSize--;
+        return true;
+    }
+    int new_index = index + 1;
+    new_index %= this->allocateSize;
+    while(new_index != index) {
+        if(elems[new_index].value == elem) {
+            elems[new_index].distance = this->EMPTY_SLOT;
+            this->logicalSize--;
+            this->rearrange(new_index + 1);
+            return true;
+        }
+        new_index++;
+        new_index %= this->allocateSize;
+    }
     return false;
 }
 
 void RobinHoodHashTable::printDebugInfo() const {
-    /* TODO: Remove this comment and implement this function. */
+    for(int i = 0;i < allocateSize; ++i) {
+        cout << elems[i] << " " ;
+    }
+    cout << endl;
 }
 
 
