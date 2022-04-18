@@ -9,8 +9,14 @@ using namespace std;
  * (e.g. Vector, HashSet, etc.).
  */
 void deleteNucleotides(Nucleotide* dna) {
-    /* TODO: Delete this comment and the next line and implement this function. */
-    (void) dna;
+    while(dna != nullptr) {
+        Nucleotide* trash = dna;
+        dna = dna->next;
+        if(trash != nullptr) {
+            trash->next = nullptr;
+            delete trash;
+        }
+    }
 }
 
 /**
@@ -21,9 +27,14 @@ void deleteNucleotides(Nucleotide* dna) {
  * (e.g. Vector, HashSet, etc.).
  */
 string fromDNA(Nucleotide* dna) {
-    /* TODO: Delete this comment and the next lines and implement this function. */
-    (void) dna;
-    return "";
+    string ret = "";
+    Nucleotide* copy_dna = dna;
+    while(copy_dna != nullptr) {
+        Nucleotide* elem = copy_dna;
+        copy_dna = copy_dna->next;
+        ret += elem->value;
+    }
+    return ret;
 }
 
 /**
@@ -34,9 +45,24 @@ string fromDNA(Nucleotide* dna) {
  * (e.g. Vector, HashSet, etc.).
  */
 Nucleotide* toStrand(const string& str) {
-    /* TODO: Delete this comment and the next lines and implement this function. */
-    (void) str;
-    return nullptr;
+    int len = str.length();
+    if(len == 0) {
+        return nullptr;
+    }
+    Nucleotide* strand = new Nucleotide;
+    strand->prev = nullptr;
+    strand->next = nullptr;
+    strand->value = str[0];
+    Nucleotide* pointer = strand;
+    for(int i= 1;i < len; ++i) {
+        Nucleotide* elem = new Nucleotide;
+        elem->value = str[i];
+        elem->prev = pointer;
+        elem->next = nullptr;
+        pointer->next = elem;
+        pointer = pointer->next;
+    }
+    return strand;
 }
 
 /**
@@ -49,10 +75,44 @@ Nucleotide* toStrand(const string& str) {
  * This function should not use any containers (e.g. Vector, HashSet, etc.)
  */
 Nucleotide* findFirst(Nucleotide* dna, Nucleotide* target) {
-    /* TODO: Delete this comment and the next lines and implement this function. */
-    (void) dna;
-    (void) target;
-    return nullptr;
+    if(target == nullptr) {
+        // deal with the case that the target is empty
+        return dna;
+    }
+    Nucleotide* find = nullptr;
+    Nucleotide* d_pointer = dna;
+    Nucleotide* t_pointer = target;
+    int flag = 0;
+    while(d_pointer != nullptr) {
+        if(d_pointer->value == t_pointer->value) {
+            find = d_pointer;
+            while(t_pointer != nullptr) {
+                if(d_pointer == nullptr) {
+                    // deal with the case when the target is longger than the origin dna
+                    return nullptr;
+                }
+                if(t_pointer->value != d_pointer->value) {
+                    t_pointer = target;
+                    // search from the next one(the code following will do this increaesment)
+                    d_pointer = find;
+                    flag = 1;
+                    break;
+                }
+                t_pointer = t_pointer->next;
+                d_pointer = d_pointer->next;
+            }
+            if(flag == 1) {
+                // not exactly match, restart
+                find = nullptr;
+                flag = 0;
+            }
+            else {
+                break;
+            }
+        }
+        d_pointer = d_pointer->next;
+    }
+    return find;
 }
 
 /**
@@ -67,10 +127,48 @@ Nucleotide* findFirst(Nucleotide* dna, Nucleotide* target) {
  * This function should not use any containers (e.g. Vector, HashSet, etc.)
  */
 bool spliceFirst(Nucleotide*& dna, Nucleotide* target) {
-    /* TODO: Delete this comment and the next lines and implement this function. */
-    (void) dna;
-    (void) target;
-    return false;
+    if(target == nullptr) {
+        // deal with the case when the target is empty
+        return true;
+    }
+    Nucleotide* find_tar = findFirst(dna,target);
+    Nucleotide* dna_pointer = dna;
+    int flag = 0;
+    if(find_tar == dna) {
+        flag = 1;
+    }
+    else {
+        while(dna_pointer->next != find_tar) {
+            dna_pointer = dna_pointer->next;
+        }
+    }
+
+    if(find_tar == nullptr) {
+        // no match
+        return false;
+    }
+    Nucleotide* t_pointer = target;
+    while(t_pointer != nullptr) {
+        Nucleotide* trash = find_tar;
+        find_tar = find_tar->next;
+        delete trash;
+        t_pointer = t_pointer->next;
+    }
+
+    if(flag) {
+        dna = find_tar;
+        if(dna != nullptr) {
+            dna->prev = nullptr;
+        }
+    }
+    else {
+        // need to put them togather
+        dna_pointer->next = find_tar;
+        if(find_tar != nullptr) {
+            find_tar->prev = dna_pointer;
+        }
+    }
+    return true;
 }
 
 

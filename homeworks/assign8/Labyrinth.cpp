@@ -1,12 +1,48 @@
 #include "Labyrinth.h"
+#include "set.h"
 using namespace std;
 
+
+bool isPathToFreedomHelper(MazeCell* start, const string& moves,Set<Item> &mark) {
+    if(start == nullptr) {
+        return false;
+    }
+
+    if(start->whatsHere != Item::NOTHING) {
+        mark.add(start->whatsHere);
+    }
+
+    if(moves.length() == 0) {
+        return true;
+    }
+
+    char ch = moves[0];
+    switch(ch) {
+    case 'E':
+        start = start->east;
+        break;
+    case 'W':
+        start = start->west;
+        break;
+    case 'N':
+        start = start->north;
+        break;
+    case 'S':
+        start = start->south;
+        break;
+    }
+    return isPathToFreedomHelper(start,moves.substr(1),mark);
+}
+
 bool isPathToFreedom(MazeCell* start, const string& moves) {
-    /* TODO: Delete this comment and the next few lines, then implement
-     * this function.
-     */
-    (void) start;
-    (void) moves;
+    Set<Item> mark;
+    if(isPathToFreedomHelper(start,moves,mark)) {
+        if(mark.contains(Item::POTION) &&
+           mark.contains(Item::SPELLBOOK) &&
+           mark.contains(Item::WAND)) {
+            return true;
+        }
+    }
     return false;
 }
 
@@ -15,20 +51,7 @@ bool isPathToFreedom(MazeCell* start, const string& moves) {
 #include "GUI/SimpleTest.h"
 #include "Demos/MazeGenerator.h"
 
-/* Optional: Add your own custom tests here! */
-
-
-
-
-
-
-
-
-
-
-
-
-
+// no my own test
 
 /* * * * * Provided Tests Below This Point * * * * */
 
