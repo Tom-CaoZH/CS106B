@@ -6,6 +6,7 @@
 #include <string>
 #include <ostream>
 
+#define EMPTY '*'
 /**
  * Type representing a node in an encoding tree. Each node stores two pointers,
  * one to the child labeled 0 and one to the child labeled 1.

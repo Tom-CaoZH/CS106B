@@ -1,4 +1,7 @@
 #include "Huffman.h"
+#include "map.h"
+#include "vector.h"
+#include "priorityqueue.h"
 using namespace std;
 
 /**
@@ -14,6 +17,20 @@ void deleteTree(EncodingTreeNode* tree) {
     }
 }
 
+// ture a string into a map which is better for latter process
+Map<char, int> str2map(const string& str) {
+    Map<char ,int> ret;
+    for(char ch : str) {
+        if(ret.containsKey(ch)) {
+            ret[ch]++;
+        }
+        else {
+            ret.put(ch,1);
+        }
+    }
+    return ret;
+}
+
 /**
  * Constructs a Huffman coding tree for the given string, using the algorithm
  * described in lecture.
@@ -26,9 +43,37 @@ void deleteTree(EncodingTreeNode* tree) {
  * second tree as the one subtree.
  */
 EncodingTreeNode* huffmanTreeFor(const string& str) {
-    /* TODO: Delete this comment and the next few lines, then implement this. */
-    (void) str;
-    return nullptr;
+    Map<char, int> elems = str2map(str);
+    if(elems.size() < 2) {
+        error("the ch in the str should greater or equal than 2");
+    }
+    PriorityQueue<EncodingTreeNode*> pq;
+    for(char elem : elems) {
+        EncodingTreeNode* leaf = new EncodingTreeNode;
+        leaf->ch = elem;
+        leaf->zero = nullptr;
+        leaf->one = nullptr;
+        pq.enqueue(leaf,elems[elem]);
+    }
+    while(pq.size() > 1) {
+        EncodingTreeNode* node = new EncodingTreeNode;
+        int p = 0;
+        node->ch = EMPTY;
+        p += pq.peekPriority();
+        node->zero = pq.dequeue();
+        p += pq.peekPriority();
+        node->one = pq.dequeue();
+        pq.enqueue(node,p);
+    }
+    EncodingTreeNode* ret = pq.dequeue();
+    return ret;
+}
+
+bool isLeaf(EncodingTreeNode* node) {
+    if(node->one == nullptr && node->zero == nullptr) {
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -42,10 +87,28 @@ EncodingTreeNode* huffmanTreeFor(const string& str) {
  * was encoded correctly, there are no stray bits in the Queue, etc.
  */
 string decodeText(Queue<Bit>& bits, EncodingTreeNode* tree) {
-    /* TODO: Delete this comment and the next few lines, then implement this. */
-    (void) bits;
-    (void) tree;
-    return "";
+    string str;
+    EncodingTreeNode* pointer = tree;
+    while(!bits.isEmpty()) {
+        Bit bit = bits.dequeue();
+        if(bit == 0) {
+            if(pointer->zero != nullptr) {
+                pointer = pointer->zero;
+            }
+        }
+        else if(bit == 1) {
+            if(pointer->one != nullptr) {
+                pointer = pointer->one;
+            }
+        }
+        if(isLeaf(pointer)) {
+            // reach the leaf, then we can get the value
+            str += pointer->ch;
+            // restore the pointer
+            pointer = tree;
+        }
+    }
+    return str;
 }
 
 /**
@@ -56,6 +119,21 @@ string decodeText(Queue<Bit>& bits, EncodingTreeNode* tree) {
  * are edge cases you don't have to handle. The input tree will contain all
  * characters that make up the input string.
  */
+
+void tree2map(EncodingTreeNode* tree, Map<char, Vector<Bit>>& elems, Vector<Bit>& path) {
+    if(isLeaf(tree)) {
+        elems.put(tree->ch,path);
+        return;
+    }
+    Bit bit_0(0);
+    path.add(bit_0);
+    tree2map(tree->zero, elems, path);
+    path.remove(bit_0);
+    Bit bit_1(1);
+    path.add(bit_1);
+    tree2map(tree->one, elems, path);
+}
+
 Queue<Bit> encodeText(const string& str, EncodingTreeNode* tree) {
     /* TODO: Delete this comment and the next few lines, then implement this. */
     (void) str;
