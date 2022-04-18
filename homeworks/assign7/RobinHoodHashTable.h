@@ -61,8 +61,6 @@ public:
      */
     void printDebugInfo() const;
 
-    // commit the backward-shift deletion
-    void rearrange(int);
 
 private:
     /* Type representing a slot in the table. Full slots have their distances
@@ -97,6 +95,8 @@ private:
     // the hash function
     HashFunction<std::string> hashFn;
 
+    // commit the backward-shift deletion
+    void rearrange(int);
 
     /* Internal shenanigans to make this play well with C++. */
     DISALLOW_COPYING_OF(RobinHoodHashTable);

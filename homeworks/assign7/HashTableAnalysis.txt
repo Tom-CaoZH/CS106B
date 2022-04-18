@@ -1,7 +1,6 @@
 Q1:
-
-
-
+linear probing is more fast and the gap is generally increase with the loader factor grows
+reason : the loader factor is bigger means that the elems in the table is more , then 
 
 Q2:
 

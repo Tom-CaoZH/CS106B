@@ -2,13 +2,15 @@
 #include <algorithm>
 using namespace std;
 
+#define TRASH "-garbage"
+
 RobinHoodHashTable::RobinHoodHashTable(HashFunction<string> hashFn) {
     this->allocateSize = hashFn.numSlots();
     this->elems = new Slot[this->allocateSize];
     this->logicalSize = 0;
     for(int i = 0;i < allocateSize; ++i) {
         elems[i].distance = this->EMPTY_SLOT;
-        elems[i].value = "garbage";
+        elems[i].value = TRASH;
     }
     this->hashFn = hashFn;
 }
@@ -88,13 +90,25 @@ bool RobinHoodHashTable::contains(const string& elem) const {
     return false;
 }
 
+// the begin is the removed elem so it is empty now
 void RobinHoodHashTable::rearrange(int begin) {
-    int index = begin;
+    int index = begin + 1;
+    index %= this->allocateSize;
     while(true) {
-        if(elems[index].distance != this->EMPTY_SLOT) {
-            int s_index = hashFn(elems[index].value);
+        if(elems[index].distance == this->EMPTY_SLOT || elems[index].distance == 0) {
+            break;
         }
+        elems[begin] = elems[index];
+        // more closer
+        elems[begin].distance--;
+        elems[index].distance = this->EMPTY_SLOT;
+        elems[index].value = TRASH;
+        index++;
+        begin++;
+        index %= this->allocateSize;
+        begin %= this->allocateSize;
     }
+    return;
 }
 
 bool RobinHoodHashTable::remove(const string& elem) {
@@ -104,7 +118,10 @@ bool RobinHoodHashTable::remove(const string& elem) {
     int index = this->hashFn(elem);
     if(elems[index].value == elem) {
         elems[index].distance = this->EMPTY_SLOT;
+        elems[index].value = TRASH;
         this->logicalSize--;
+        this->rearrange(index);
+//        this->printDebugInfo();
         return true;
     }
     int new_index = index + 1;
@@ -112,8 +129,10 @@ bool RobinHoodHashTable::remove(const string& elem) {
     while(new_index != index) {
         if(elems[new_index].value == elem) {
             elems[new_index].distance = this->EMPTY_SLOT;
+            elems[new_index].value = TRASH;
             this->logicalSize--;
-            this->rearrange(new_index + 1);
+            this->rearrange(new_index);
+//            this->printDebugInfo();
             return true;
         }
         new_index++;
@@ -1224,7 +1243,7 @@ PROVIDED_TEST("Stress Test: Inserts/searches/deletes work in expected time O(1).
 #include "Demos/Timer.h"
 #include <fstream>
 PROVIDED_TEST("Stress Test: Handles large workflows with little free space (should take at most five seconds)") {
-    SHOW_ERROR("Stress test is disabled by default. To run it, comment out line " + to_string(__LINE__) + " of " + getTail(__FILE__) + ".");
+//    SHOW_ERROR("Stress test is disabled by default. To run it, comment out line " + to_string(__LINE__) + " of " + getTail(__FILE__) + ".");
 
     Vector<string> english;
     ifstream input("res/EnglishWords.txt");
