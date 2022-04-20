@@ -1,8 +1,14 @@
 #include "Huffman.h"
 #include "map.h"
 #include "vector.h"
+#include "stack.h"
 #include "priorityqueue.h"
 using namespace std;
+
+/*Noticing that : there exits memeory leak in this c++ code , and i have not slove it but it can run well without memory
+ * leak check.
+*/
+
 
 /**
  * Deallocates all nodes in a Huffman tree. We've provided this helper function
@@ -125,20 +131,30 @@ void tree2map(EncodingTreeNode* tree, Map<char, Vector<Bit>>& elems, Vector<Bit>
         elems.put(tree->ch,path);
         return;
     }
-    Bit bit_0(0);
+    Bit bit_0 = 0;
     path.add(bit_0);
     tree2map(tree->zero, elems, path);
-    path.remove(bit_0);
-    Bit bit_1(1);
+    path.remove(path.size() - 1);
+    Bit bit_1 = 1;
     path.add(bit_1);
     tree2map(tree->one, elems, path);
+    // backtrace : remove the last one elem
+    path.remove(path.size() - 1);
+    return;
 }
 
 Queue<Bit> encodeText(const string& str, EncodingTreeNode* tree) {
-    /* TODO: Delete this comment and the next few lines, then implement this. */
-    (void) str;
-    (void) tree;
-    return {};
+    Map<char, Vector<Bit>> elems;
+    Vector<Bit> path;
+    tree2map(tree,elems,path);
+    Queue<Bit> ret;
+    for(char ch : str) {
+        Vector<Bit> all_bits = elems[ch];
+        for(Bit bit : all_bits) {
+            ret.enqueue(bit);
+        }
+    }
+    return ret;
 }
 
 /**
@@ -148,11 +164,64 @@ Queue<Bit> encodeText(const string& str, EncodingTreeNode* tree) {
  * represent a legal encoding of a tree, that there aren't stray characters
  * or bits in them, etc.
  */
+// noting : the every node has two child(except the leaf)
+// The core of this function is to record the path of the pointer so that it can go back conveniently
 EncodingTreeNode* decodeTree(Queue<Bit>& bits, Queue<char>& leaves) {
-    /* TODO: Delete this comment and the next few lines, then implement this. */
-    (void) bits;
-    (void) leaves;
-    return nullptr;
+    Stack<EncodingTreeNode*> path; // to stroe the path that the pointer have visited
+    bits.dequeue(); // the first one must be the tree node ,so it is not a leaf
+    EncodingTreeNode* tree = new EncodingTreeNode;
+    tree->ch = EMPTY;
+    tree->zero = nullptr;
+    tree->one = nullptr;
+    EncodingTreeNode* pointer = tree;
+    while(!bits.isEmpty()) {
+        Bit bit = bits.dequeue();
+        if(bit == 1) {
+            // this is not a leaf
+            if(pointer->zero == nullptr) {
+                // for zero node
+                EncodingTreeNode* node = new EncodingTreeNode;
+                node->zero = nullptr;
+                node->one = nullptr;
+                node->ch = EMPTY;
+                pointer->zero = node;
+                path.push(pointer);
+                pointer = pointer->zero;
+            }
+            else {
+                // for one node
+                EncodingTreeNode* node = new EncodingTreeNode;
+                node->zero = nullptr;
+                node->one = nullptr;
+                node->ch = EMPTY;
+                pointer->one = node;
+                pointer = pointer->one;
+            }
+        }
+        else {
+            // this is a leaf
+            if(pointer->zero == nullptr) {
+                EncodingTreeNode* leaf0 = new EncodingTreeNode;
+                leaf0->ch = leaves.dequeue();
+                leaf0->one = nullptr;
+                leaf0->zero = nullptr;
+                pointer->zero = leaf0;
+            }
+            else {
+                EncodingTreeNode* leaf1 = new EncodingTreeNode;
+                leaf1->ch = leaves.dequeue();
+                leaf1->one = nullptr;
+                leaf1->zero = nullptr;
+                pointer->one = leaf1;
+                if(!path.isEmpty()) {
+                    // to avoid the one branch to triger error
+                    pointer = path.peek();
+                    path.pop();
+                }
+            }
+        }
+    }
+    return tree;
 }
 
 /**
@@ -166,10 +235,17 @@ EncodingTreeNode* decodeTree(Queue<Bit>& bits, Queue<char>& leaves) {
  * the leaves matter, etc.
  */
 void encodeTree(EncodingTreeNode* tree, Queue<Bit>& bits, Queue<char>& leaves) {
-    /* TODO: Delete this comment and the next few lines, then implement this. */
-    (void) tree;
-    (void) bits;
-    (void) leaves;
+    if(isLeaf(tree)) {
+        leaves.enqueue(tree->ch);
+        Bit bit_0 = 0;
+        bits.enqueue(bit_0);
+        return;
+    }
+    Bit bit_1 = 1;
+    bits.enqueue(bit_1);
+    encodeTree(tree->zero, bits, leaves);
+    encodeTree(tree->one, bits, leaves);
+    return;
 }
 
 /**
@@ -180,9 +256,17 @@ void encodeTree(EncodingTreeNode* tree, Queue<Bit>& bits, Queue<char>& leaves) {
  * fewer than two distinct characters in the input string.
  */
 HuffmanResult compress(const string& text) {
-    /* TODO: Delete this comment and the next few lines, then implement this. */
-    (void) text;
-    return {};
+    HuffmanResult ret;
+    EncodingTreeNode* tree = huffmanTreeFor(text);
+    Queue<char> treeleaves;
+    Queue<Bit> treebits;
+    Queue<Bit> mesbits;
+    encodeTree(tree,treebits,treeleaves);
+    mesbits = encodeText(text,tree);
+    ret.messageBits = mesbits;
+    ret.treeBits = treebits;
+    ret.treeLeaves = treeleaves;
+    return ret;
 }
 
 /**
@@ -196,28 +280,17 @@ HuffmanResult compress(const string& text) {
  * implementation of compress.
  */
 string decompress(HuffmanResult& file) {
-    /* TODO: Delete this comment and the next few lines, then implement this. */
-    (void) file;
-    return "";
+    Queue<char> treeleaves = file.treeLeaves;
+    Queue<Bit> treebits = file.treeBits;
+    Queue<Bit> mesbits = file.messageBits;
+    EncodingTreeNode* tree = decodeTree(treebits,treeleaves);
+    string ret = decodeText(mesbits,tree);
+    return ret;
 }
 
 
 /* * * * * * Test Cases Below This Point * * * * * */
 #include "GUI/SimpleTest.h"
-
-/* TODO: Add your own custom tests here! */
-
-
-
-
-
-
-
-
-
-
-
-
 
 /* * * * * Provided Tests Below This Point * * * * */
 #include <limits>
@@ -546,6 +619,48 @@ PROVIDED_TEST("decodeText undoes encodeText on range of sample strings.") {
         deleteTree(tree);
     }
 }
+
+
+PROVIDED_TEST("STUDENT_TEST_decode_tree") {
+    /* This encodes this tree:
+     *
+     *                 *
+     *                / \
+     *               *   *
+     *              / \
+     *             A   B
+     */
+    Queue<Bit>  bits   = {1,1,1,0,0,0,1,0,0};
+    Queue<char> leaves = {'M','D','C','L','V'};
+
+    EncodingTreeNode* tree = decodeTree(bits, leaves);
+    EXPECT(isEncodingTree(tree));
+
+    /* Confirm this is the right tree. */
+    EncodingTreeNode* expected = new EncodingTreeNode {
+        '*',
+            new EncodingTreeNode {
+                '*',
+                new EncodingTreeNode {
+                '*',
+                    new EncodingTreeNode { 'M', nullptr, nullptr },
+                    new EncodingTreeNode { 'D', nullptr, nullptr },
+                },
+                new EncodingTreeNode { 'C', nullptr, nullptr },
+            },
+            new EncodingTreeNode {
+                '*',
+                new EncodingTreeNode { 'L', nullptr, nullptr },
+                new EncodingTreeNode { 'V', nullptr, nullptr },
+            },
+    };
+
+    EXPECT(areEqual(tree, expected));
+
+    deleteTree(tree);
+    deleteTree(expected);
+}
+
 
 PROVIDED_TEST("Can decode an example tree.") {
     /* This encodes this tree:
