@@ -1,2 +1,5 @@
 # CS106B
-my sections and homeworks of the standford class
+Hi , here is my all solutions to the standford DSA clas including the sections(21fall) and homework(21winter).
+
+
+
